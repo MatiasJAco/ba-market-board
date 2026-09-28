@@ -6,6 +6,8 @@ import { pathToFileURL } from "node:url";
 import { DASHBOARD_PATH, createDashboardHandler } from "./api/dashboard-route.js";
 import { loadConfig } from "./config.js";
 import { createDashboardService } from "./dashboard/service.js";
+import { createData912CedearsAdapter } from "./sources/data912-cedears.js";
+import { createDolarApiMepAdapter } from "./sources/dolarapi-mep.js";
 import { createOpenMeteoAdapter } from "./sources/open-meteo.js";
 
 const STATIC_ASSETS = new Map([
@@ -82,7 +84,12 @@ export function createServer({ fetchImpl = globalThis.fetch, now = Date.now, ada
   const { publicDir, timeoutMs } = loadConfig();
   const handleDashboard = createDashboardHandler({
     service: createDashboardService({
-      adapters: { weather: createOpenMeteoAdapter, ...adapters },
+      adapters: {
+        weather: createOpenMeteoAdapter,
+        cedears: createData912CedearsAdapter,
+        mep: createDolarApiMepAdapter,
+        ...adapters
+      },
       now,
       fetchImpl,
       timeoutMs

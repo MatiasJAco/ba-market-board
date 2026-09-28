@@ -4,7 +4,21 @@ const TIME_PREFIX = "Consultado: ";
 const OBSERVED_PREFIX = "Observado: ";
 const TEMPERATURE_UNIT = " °C";
 const VALUE_SEPARATOR = " · ";
+const ROW_SEPARATOR = "\n";
+const CURRENCY_UNIT = " ARS";
+const RATE_UNIT = " ARS por USD";
+const RATE_TYPE_LABEL = "MEP/bolsa";
 const TEMPERATURE_FORMAT = new Intl.NumberFormat("es-AR", { maximumFractionDigits: 2 });
+const CURRENCY_FORMAT = new Intl.NumberFormat("es-AR", { maximumFractionDigits: 2 });
+const RATE_FORMAT = new Intl.NumberFormat("es-AR", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2
+});
+
+const SIDES = new Map([
+  ["buyArs", "Compra"],
+  ["sellArs", "Venta"]
+]);
 
 function defaultValueText(value) {
   if (typeof value === "string") {
@@ -28,6 +42,24 @@ function isRecord(value) {
 
 function retrievalTimeOf(result) {
   return isRecord(result) ? result.retrievedAt : null;
+}
+
+function isFiniteNumber(value) {
+  return typeof value === "number" && Number.isFinite(value);
+}
+
+function isText(value) {
+  return typeof value === "string" && value !== "";
+}
+
+function sourceTimeOf(value, result) {
+  const observedAt = isRecord(value) ? value.observedAt : null;
+  const fromSource = isRecord(value) && value.timestampKind === "source" && isText(observedAt);
+
+  return {
+    time: fromSource ? observedAt : retrievalTimeOf(result),
+    timeKind: fromSource ? "source" : "retrieval"
+  };
 }
 
 function renderWeather(value, result) {
@@ -56,10 +88,70 @@ function renderWeather(value, result) {
   };
 }
 
+function renderCedears(value, result) {
+  if (!isRecord(value) || !Array.isArray(value.quotes)) {
+    return defaultValueText(value, result);
+  }
+
+  const rows = [];
+
+  for (const quote of value.quotes) {
+    if (!isRecord(quote)) {
+      continue;
+    }
+
+    const parts = [];
+
+    if (isText(quote.ticker)) {
+      parts.push(quote.ticker);
+    }
+
+    if (isText(quote.label)) {
+      parts.push(quote.label);
+    }
+
+    if (isFiniteNumber(quote.priceArs)) {
+      parts.push(`${CURRENCY_FORMAT.format(quote.priceArs)}${CURRENCY_UNIT}`);
+    }
+
+    if (parts.length !== 0) {
+      rows.push(parts.join(VALUE_SEPARATOR));
+    }
+  }
+
+  return {
+    text: rows.join(ROW_SEPARATOR),
+    time: retrievalTimeOf(result),
+    timeKind: "retrieval"
+  };
+}
+
+function renderMep(value, result) {
+  if (!isRecord(value)) {
+    return defaultValueText(value, result);
+  }
+
+  const segments = [];
+
+  if (isFiniteNumber(value.midpointArs)) {
+    segments.push(`${RATE_FORMAT.format(value.midpointArs)}${RATE_UNIT}`);
+  }
+
+  segments.push(isText(value.rateType) ? value.rateType : RATE_TYPE_LABEL);
+
+  for (const [field, label] of SIDES) {
+    if (isFiniteNumber(value[field])) {
+      segments.push(`${label} ${CURRENCY_FORMAT.format(value[field])}${CURRENCY_UNIT}`);
+    }
+  }
+
+  return { text: segments.join(VALUE_SEPARATOR), ...sourceTimeOf(value, result) };
+}
+
 const VALUE_RENDERERS = Object.freeze({
   weather: renderWeather,
-  cedears: defaultValueText,
-  mep: defaultValueText
+  cedears: renderCedears,
+  mep: renderMep
 });
 
 function formatTimeText(value) {

@@ -195,20 +195,20 @@ appear in that order. Omit one and confirm a visible error rather than a substit
 
 **Requirements covered**: FR-005, FR-006, FR-009, FR-010, FR-011, SC-002, SC-005.
 
-- [ ] T014 [US3] Implement `createData912CedearsAdapter({ fetchImpl, now, timeoutMs })` in
+- [x] T014 [US3] Implement `createData912CedearsAdapter({ fetchImpl, now, timeoutMs })` in
   `src/sources/data912-cedears.js`, returning `fetchSnapshot()`. Hardcode the allowlist and output
   order `["AAPL", "MSFT", "GOOGL", "META", "NVDA"]` and the fixed local label map
   (`Apple`, `Microsoft`, `Alphabet`, `Meta`, `Nvidia`); take `priceArs` from the payload's `c` field
   and never from a label field. Set `observedAt` to null and `timestampKind` to `"retrieval"`. Never
   rank, sort, or substitute symbols. Fail the whole widget rather than returning a partial list.
-- [ ] T015 [US3] Add the `renderCedears` hook to `src/public/render.js`: one row per quote in array
+- [x] T015 [US3] Add the `renderCedears` hook to `src/public/render.js`: one row per quote in array
   order with no client-side re-sorting, each showing ticker, label, and `priceArs` as pesos, plus a
   **retrieval** timestamp label derived from the result `retrievedAt`. Never a live or real-time
   label. **Constraint from T012**: the renderer may only use `getElementById`, `textContent`, and
   `hidden` — no `innerHTML`, no element creation — so the five rows must be a single `\n`-joined text
   node. Return the same `{ text, time, timeKind }` view model the weather hook uses, with
   `timeKind: "retrieval"` so the label reads `Consultado: `.
-- [ ] T016 [P] [US3] Register the Data912 adapter by adding one line to the `adapters` map in
+- [x] T016 [P] [US3] Register the Data912 adapter by adding one line to the `adapters` map in
   `src/server.js` (the factory form). Add `white-space: pre-line` to `.widget__value` in
   `src/public/styles.css` so the `\n`-joined rows from T015 render as separate lines, plus the CEDEAR
   list and error styling, including wrap behavior for long error text at 320px.
@@ -228,7 +228,7 @@ to another rate type.
 
 **Requirements covered**: FR-007, FR-008, FR-009, FR-010, SC-003, SC-005.
 
-- [ ] T017 [US4] Implement `createDolarApiMepAdapter({ fetchImpl, now, timeoutMs })` in
+- [x] T017 [US4] Implement `createDolarApiMepAdapter({ fetchImpl, now, timeoutMs })` in
   `src/sources/dolarapi-mep.js`, returning `fetchSnapshot()`. Set `rateType` to the literal
   `"MEP/bolsa"`, compute `midpointArs` as `(compra + venta) / 2` rounded to exactly two decimals,
   apply the 7-day staleness window, and require both `compra` and `venta` to be positive numbers.
@@ -236,10 +236,10 @@ to another rate type.
   with an inline check — T002 removed the shared `isFutureBeyondSkew`, so this rule is now the
   adapter's own. Return a typed error instead of any substitute rate when the source is unavailable.
   No code path reads, defaults to, or reports a BNA, blue, or CCL rate.
-- [ ] T018 [US4] Add the `renderMep` hook to `src/public/render.js`: `midpointArs` to two decimals
+- [x] T018 [US4] Add the `renderMep` hook to `src/public/render.js`: `midpointArs` to two decimals
   with an `ARS per USD` unit, the `MEP/bolsa` label, the buy and sell values, and the
   `timestampKind`-appropriate time label. An error result renders the message and no numeric rate.
-- [ ] T019 [P] [US4] Register the DolarAPI adapter and add the rate and error styling.
+- [x] T019 [P] [US4] Register the DolarAPI adapter and add the rate and error styling.
 
 ---
 
