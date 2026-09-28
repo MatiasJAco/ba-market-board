@@ -20,8 +20,8 @@ The selected sources are:
 - Native `node:http` for the server and route handling.
 - Native `fetch` with `AbortSignal.timeout` for upstream requests.
 - Plain browser JavaScript with no bundler, framework, or transpiler.
-- `node:test` and `node --test` for unit and integration tests.
-- Dependency injection for `fetch`, the clock, and the browser document/scheduler seams.
+- `node:test` and `node --test` for the 8-test budgeted suite.
+- Dependency injection for `fetch` and for the browser document, so mocked HTTP and the two rendering tests need no live provider and no shared test-double module.
 
 ### Reasons
 
@@ -57,7 +57,7 @@ The selected sources are:
 - Endpoint: `https://dolarapi.com/v1/dolares/bolsa`
 - Response fields used: `compra`, `venta`, and `fechaActualizacion`.
 - The adapter calculates `(compra + venta) / 2` and rounds to two decimal places. It does not use or display BNA, blue, or another rate as a fallback.
-- A direct request to the documented endpoint succeeded without credentials during research. The project still treats the no-secret behavior as an adapter assumption that must be covered by tests and reviewed before a production release.
+- A direct request to the documented endpoint succeeded without credentials during research. The project still treats the no-secret behavior as an adapter assumption that must be checked in code review and verified by loading the page against the live sources before a production release.
 - The documentation identifies DolarHoy as the upstream data source. The service is informational and can be interrupted; failures must be visible.
 
 ### Rejected sources
@@ -106,7 +106,7 @@ Rejected. The feature is a load-only snapshot and explicitly excludes persistenc
 
 ## Open Risks and Mitigations
 
-- **Source availability**: adapters isolate each source; `Promise.allSettled` prevents a total page failure; tests use fixtures rather than live calls.
+- **Source availability**: adapters isolate each source; `Promise.allSettled` prevents a total page failure; adapter tests use mocked responses rather than live calls.
 - **Schema drift**: adapters validate only the fields required by the contract and return `invalid_schema` for malformed payloads.
 - **Source terms**: `research.md` records the free/public assumptions; a release review must confirm that the intended deployment remains non-commercial and acceptable to each source.
 - **Non-real-time CEDEAR data**: the UI uses retrieval time and the source’s quote wording; it does not claim real-time status.

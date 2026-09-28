@@ -48,17 +48,15 @@ The equivalent native command is:
 node --test
 ```
 
-The test suite covers:
+The test suite is exactly 8 tests in 2 files, against a hard cap of 12:
 
-- Open-Meteo success, timeout, malformed, and stale responses.
-- Data912 CEDEAR success, missing-ticker, malformed-value, and non-real-time timestamp behavior.
-- DolarAPI MEP midpoint, missing-side, invalid-value, and source-timestamp behavior.
-- Independent partial failure at the service and HTTP-route levels.
-- Fixed CEDEAR ordering and MEP labeling.
-- Client loading, data, and error rendering.
-- Proof that the client does not install an interval or automatic retry.
+| File | Tests |
+|------|-------|
+| `tests/render.test.js` | The page serves all three widget regions; a failed widget renders its visible error and no numeric value |
+| `tests/adapters.test.js` | Each of the three adapters maps a valid mocked response to a value, and maps a failing mocked response to a typed error with no substituted data |
 
-Tests use injected fetch implementations, fixtures, and fake browser document/scheduler objects. They do not contact live providers.
+Tests use injected fetch implementations with small response literals written inline. There are no
+fixture files, shared test helpers, or test-double modules, and no live provider is contacted.
 
 ## Inspect the API locally
 
@@ -81,4 +79,4 @@ The endpoint returns JSON with `weather`, `cedears`, and `mep` results. A failed
 - **A widget shows an error**: inspect the widget message and the local API response; one source failure does not blank the other widgets.
 - **Port is already in use**: start the server with a different `PORT` value.
 - **Live values differ from expectations**: market data can be delayed, cached, or unavailable; the displayed timestamp and error state are intentional.
-- **Tests attempt network access**: run `node --test` and confirm the test fixtures and injected fetch clients are being used.
+- **Tests attempt network access**: run `node --test` and confirm each adapter test passes its own inline `fetchImpl` rather than the platform `fetch`.

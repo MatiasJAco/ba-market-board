@@ -136,11 +136,12 @@ GET /api/dashboard
 
 ## Test Seams
 
-Each adapter must be testable without a live provider by supplying:
+Each adapter accepts an injected `fetchImpl` so it can be driven without a live provider by a
+single function that either returns a controlled `Response`-like object or throws a controlled
+error. That is the only seam the adapter tests need; the response bodies are small literals
+written inline in `tests/adapters.test.js`.
 
-- A fake `fetchImpl` that returns a controlled `Response`-like object or throws a controlled error.
-- A fake `now` function for timestamp and staleness checks.
-- A short timeout or an abort signal for timeout behavior.
-- Small success, partial, malformed, and empty fixtures.
-
-Rendering tests receive a document-like test double and a scheduler-like test double. The browser client must not schedule a recurring timer; the no-refresh test asserts that no interval is registered and that a later simulated time does not issue another API request.
+Rendering takes a document, so the two rendering tests pass a small inline fake from
+`tests/render.test.js`. The absence of a recurring timer is a code-review item, not a test: the
+browser client is read to confirm it never registers an interval or retry, and the page is loaded
+by hand to confirm the snapshot does not change on its own.

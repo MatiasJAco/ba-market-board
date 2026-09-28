@@ -152,7 +152,12 @@ verify it does not fall back to another rate type.
   the repository.
 - **FR-014**: The project MUST include automated tests for user-visible rendering and data-source
   adapter behavior, using mocked successful and failed responses, including fixed-ticker,
-  MEP-rate, timestamp, and no-interval-refresh behavior.
+  MEP-rate, timestamp, and no-interval-refresh behavior. The suite MUST contain at most 12
+  automated tests in total, MUST cover the failed-widget error state, and MUST NOT include
+  per-ticker tests, dedicated contract-test suites, recorded snapshot fixtures, field-by-field
+  end-to-end coverage, coverage-percentage targets, or one test file per function. A test MUST
+  NOT be required to be written and observed to fail before the corresponding implementation
+  exists.
 - **FR-015**: The project MUST include a README that explains how to run the dashboard locally
   and how to run its automated tests.
 - **FR-016**: The feature MUST exclude authentication, alerts, historical charts, trading
@@ -187,8 +192,9 @@ verify it does not fall back to another rate type.
   messages remain readable without horizontal scrolling.
 - **SC-007**: Under a normal mobile connection, at least 95% of visits show the initial widget
   states within 3 seconds of opening the page.
-- **SC-008**: The automated suite covers rendering and adapter success/failure behavior with
-  mocked responses, including the four resolved policies, and all tests pass before release.
+- **SC-008**: The automated suite contains at most 12 tests, uses mocked responses only, covers
+  rendering and adapter success/failure behavior including the four resolved policies, and all
+  tests pass before release.
 - **SC-009**: A developer starting from a clean checkout can follow the README to run the
   dashboard locally and execute the automated tests without undocumented setup steps.
 
@@ -204,6 +210,10 @@ verify it does not fall back to another rate type.
   explicit source or retrieval label.
 - A page load is the only refresh trigger. There is no background interval, live stream, or
   automatic retry loop in this version.
+- The test suite is deliberately small because the product is a tiny one-page dashboard. A test
+  is added only by folding it into an existing one or by removing an equivalent number of
+  existing tests, and behavior that no test covers is accepted consciously rather than closed
+  with an extra test.
 - The weather dependency is Open-Meteo; the CEDEAR and MEP widgets depend on public, free sources
   that provide the required fields, and a missing dependency produces a visible widget error.
 - Data is not persisted as a historical series. The dashboard shows the current snapshot only.

@@ -1,10 +1,26 @@
 <!--
 Sync Impact Report
-- Version change: unversioned scaffold → 1.0.0
-- Modified principles: placeholder principles → seven named principles
-- Added sections: Product and Security Constraints; Development Workflow and Quality Gates
-- Removed sections: none
-- Follow-up TODOs: none
+- Version change: 1.0.0 → 2.0.0 (MAJOR)
+- Reason: Principle II redefined. "Test-First" (TDD, tests-before-implementation, mandatory
+  red-green ceremony) is replaced by "Right-Sized Tests" (hard cap of 12 automated tests for the
+  whole app, fixed allowed inventory, explicit forbidden patterns). Redefining a non-negotiable
+  principle requires MAJOR per the Governance section.
+- Modified principles: II. Test-First → II. Right-Sized Tests (NON-NEGOTIABLE)
+- Added sections: Testing Scope and Budget (within Core Principles, as Principle II)
+- Unchanged principles: I, III, IV, V, VI, VII. Note: VII (Visible API Failures) keeps its
+  user-visible requirement; only its *test* obligation is now bounded by Principle II.
+- Removed sections: none (the TDD red-green obligation is removed, not relocated)
+- Downstream artifacts requiring regeneration (not yet updated by this amendment):
+  specs/002-dashboard-data-policy/tasks.md (T007-T018, T020-T026, T031-T050 mandate per-function
+  and per-field test files and failing-first ceremony), specs/002-dashboard-data-policy/spec.md
+  (FR-014, SC-005, SC-008 and line ~191 test-count language),
+  specs/002-dashboard-data-policy/plan.md, specs/002-dashboard-data-policy/contracts/*,
+  specs/002-dashboard-data-policy/checklists/requirements.md
+- Migration impact: the existing suite has 150 passing tests across 8 files, all of which are
+  outside the allowed inventory. They must be deleted or folded down to the budget. The 8
+  prescribed tests target code that does not exist yet (src/sources/, src/api/, and the
+  dashboard service are empty), so the suite cannot be rebuilt until the remaining tasks land.
+- Follow-up TODOs: regenerate tasks.md/spec.md against Principle II before resuming implementation
 -->
 
 # BA Market Board Constitution
@@ -17,11 +33,52 @@ The product MUST remain a small webapp with only the functionality defined by th
 specification, plan, and tasks. Do not add speculative features, services, or abstractions.
 Keep the implementation as small as the requirements allow.
 
-### II. Test-First (NON-NEGOTIABLE)
+### II. Right-Sized Tests (NON-NEGOTIABLE)
 
-Write tests before implementation for every task. Tests MUST fail for the intended reason
-before production code is written, and the implementation MUST pass the relevant tests before
-the task is complete. Test behavior and user-visible outcomes, not implementation details.
+This is a tiny one-page dashboard. The test suite is a **budgeted safety net, not a quality
+scorecard**. Total suite size is a constitutional constraint.
+
+**Hard cap**: the whole app MUST have **at most 12 automated tests**. A 13th test is a
+constitutional violation even if it passes.
+
+**Allowed tests** — only these categories may exist:
+
+| # | Test | Purpose |
+|---|------|---------|
+| 1 | Smoke | The page renders three widgets |
+| 2 | Weather adapter (happy path) | Mocked HTTP, valid response maps to a weather value |
+| 3 | CEDEAR adapter (happy path) | Mocked HTTP, valid response maps to five CEDEAR quotes |
+| 4 | FX adapter (happy path) | Mocked HTTP, valid response maps to a peso rate |
+| 5 | Weather adapter (failure) | HTTP error / API failure yields a typed error result |
+| 6 | CEDEAR adapter (failure) | HTTP error / API failure yields a typed error result |
+| 7 | FX adapter (failure) | HTTP error / API failure yields a typed error result |
+| 8 | Error state | A failed widget shows the visible error state |
+
+Adapter tests MUST use mocked HTTP. Live network calls in tests are forbidden.
+
+**Forbidden** — these MUST NOT exist, and existing ones MUST be deleted or folded into the
+budget above:
+
+- Contract-test folders (dedicated per-endpoint / per-contract test directories)
+- Per-ticker tests (a test file or case per CEDEAR symbol)
+- Snapshot forests (recorded DOM/snapshot fixtures asserted field by field)
+- E2E for every field
+- Coverage percentage targets or gates
+- TDD red-green ceremony (tests MUST NOT be required to be written and observed to fail
+  before implementation code exists)
+- A test file per function (one file for a helper, a guard, a clock, a document double, a
+  scheduler double, or a config loader is forbidden)
+
+**Budget rules**: tests are folded into the closest allowed category rather than added.
+A bug fix is verified inside the existing allowed test whenever that test can express the
+regression. New tests require removing an equivalent number of existing ones to stay under
+the cap. Unused test helpers, doubles, and fixtures MUST be deleted along with the tests
+that needed them.
+
+**What the suite is still for**: a change is not done until the whole suite passes
+(`npm test` green) and the new behavior is either covered by an allowed test or consciously
+accepted as uncovered. Principle VII's user-visible error requirement stands on its own and
+is not weakened by the removal of the TDD ceremony.
 
 ### III. No API Secrets in Git (NON-NEGOTIABLE)
 
@@ -56,8 +113,7 @@ false zero values, or an apparently healthy page.
   and the Argentine peso versus USD rate. The current specification decides whether the
   exchange-rate value is official or blue.
 - Use public, free APIs only and keep all API secrets out of git.
-- API failures MUST be visible, distinguishable from valid empty or zero data, and covered by
-  tests for the affected state.
+- API failures MUST be visible and distinguishable from valid empty or zero data.
 
 ## Development Workflow and Quality Gates
 
@@ -65,10 +121,16 @@ false zero values, or an apparently healthy page.
   implementation.
 - Implement one task at a time. A tester MUST verify each task after implementation.
 - Do not implement features that are absent from the current specification, plan, and tasks.
-- Every review MUST check test coverage, the one-page constraint, phone readability, public
-  free API usage, secret exclusion, and visible API failure handling.
-- A task is not complete until its relevant tests pass and its quality-gate requirements are
-  satisfied.
+- Every review MUST check the test budget (total count and the allowed inventory), the one-page
+  constraint, phone readability, public free API usage, secret exclusion, and visible API
+  failure handling.
+- A task is not complete until the whole suite passes and the task's behavior is covered by an
+  allowed test or consciously accepted as uncovered.
+- Task lists MUST NOT mandate test files or test cases that Principle II forbids, and MUST NOT
+  require a test to be written and observed to fail before implementation.
+- Adding a helper module for testability is optional, not a reason to add a test. Prefer code
+  that can be exercised from the eight allowed tests; do not build a test-seam architecture
+  (document doubles, scheduler doubles, clock injection) that has no allowed test to justify it.
 
 ## Governance
 
@@ -81,4 +143,4 @@ adding a principle or materially expanding governance guidance, and PATCH for cl
 do not change governance meaning. Every amendment MUST update the version and amendment date.
 Reviews and implementation work MUST verify compliance before completion.
 
-**Version**: 1.0.0 | **Ratified**: 2026-09-25 | **Last Amended**: 2026-09-25
+**Version**: 2.0.0 | **Ratified**: 2026-09-25 | **Last Amended**: 2026-09-28

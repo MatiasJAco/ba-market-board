@@ -34,7 +34,7 @@ WidgetErrorDetail
 └── message: string
 ```
 
-`ErrorCode` is one of `timeout`, `upstream_error`, `invalid_json`, `invalid_schema`, `missing_ticker`, `invalid_value`, `stale`, or `unknown`. Error messages are short, user-facing strings. They never contain response bodies, stack traces, secrets, or arbitrary upstream text.
+`ErrorCode` is one of `timeout`, `upstream_error`, `invalid_json`, `invalid_schema`, `missing_ticker`, `invalid_value`, `stale`, or `unknown`. Error messages are short, user-facing strings, written in Spanish to match the page copy shown to the anonymous Argentine visitor. They never contain response bodies, stack traces, secrets, or arbitrary upstream text.
 
 ## Weather
 

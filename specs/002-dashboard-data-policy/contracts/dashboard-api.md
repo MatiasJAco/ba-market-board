@@ -122,7 +122,7 @@ Each result is either a success object or an error object. `value` is present on
     "retrievedAt": "2026-09-25T14:58:00.100Z",
     "error": {
       "code": "timeout",
-      "message": "Weather data is temporarily unavailable."
+      "message": "El dato del clima no está disponible temporalmente."
     }
   },
   "cedears": {
@@ -171,7 +171,7 @@ Each result is either a success object or an error object. `value` is present on
     "retrievedAt": "2026-09-25T14:58:00.300Z",
     "error": {
       "code": "upstream_error",
-      "message": "MEP data is temporarily unavailable."
+      "message": "El dato MEP no está disponible temporalmente."
     }
   }
 }
