@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tablero de mercado</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main id="app" class="board">
+      <header class="board__header">
+        <h1 class="board__title">Tablero de mercado</h1>
+        <p class="board__subtitle">Buenos Aires &middot; una sola consulta por carga de página</p>
+      </header>
+
+      <section id="weather-widget" class="widget" aria-labelledby="weather-heading">
+        <h2 id="weather-heading" class="widget__title">Clima en Buenos Aires</h2>
+        <p id="weather-source" class="widget__source" hidden></p>
+        <p id="weather-loading" class="widget__loading" role="status" aria-live="polite">
+          Cargando el clima…
+        </p>
+        <div id="weather-value" class="widget__value" hidden></div>
+        <p id="weather-time" class="widget__time" hidden></p>
+        <div id="weather-error" class="widget__error" role="alert" aria-live="polite" hidden></div>
+      </section>
+
+      <section id="cedears-widget" class="widget" aria-labelledby="cedears-heading">
+        <h2 id="cedears-heading" class="widget__title">CEDEARs</h2>
+        <p id="cedears-source" class="widget__source" hidden></p>
+        <p id="cedears-loading" class="widget__loading" role="status" aria-live="polite">
+          Cargando los CEDEARs…
+        </p>
+        <div id="cedears-value" class="widget__value" hidden></div>
+        <p id="cedears-time" class="widget__time" hidden></p>
+        <div id="cedears-error" class="widget__error" role="alert" aria-live="polite" hidden></div>
+      </section>
+
+      <section id="mep-widget" class="widget" aria-labelledby="mep-heading">
+        <h2 id="mep-heading" class="widget__title">Dólar MEP/bolsa</h2>
+        <p id="mep-source" class="widget__source" hidden></p>
+        <p id="mep-loading" class="widget__loading" role="status" aria-live="polite">
+          Cargando el dólar MEP…
+        </p>
+        <div id="mep-value" class="widget__value" hidden></div>
+        <p id="mep-time" class="widget__time" hidden></p>
+        <div id="mep-error" class="widget__error" role="alert" aria-live="polite" hidden></div>
+      </section>
+    </main>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>
