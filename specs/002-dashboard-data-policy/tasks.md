@@ -248,7 +248,7 @@ to another rate type.
 **Purpose**: Write the only 8 tests the product is allowed to have. Each task below owns a file; no
 task adds a second file, a fixture, a helper, or a double.
 
-- [ ] T020 [TEST] Create `tests/render.test.js` with exactly **2 tests**:
+- [x] T020 [TEST] Create `tests/render.test.js` with exactly **2 tests**:
     1. *Smoke* — start `createServer()` on an ephemeral port, `GET /`, and assert the returned HTML
        contains all three widget regions (`weather-widget`, `cedears-widget`, `mep-widget`).
     2. *Error state* — build a small inline fake `document` in this file, apply an
@@ -257,7 +257,7 @@ task adds a second file, a fixture, a helper, or a double.
 
     This is the first and only time a test file, a fake document, or a test runner import is
     created. Nothing in T001-T019 may add one.
-- [ ] T021 [TEST] Add exactly **3 happy-path tests** to `tests/adapters.test.js`, one per adapter,
+- [x] T021 [TEST] Add exactly **3 happy-path tests** to `tests/adapters.test.js`, one per adapter,
     each injecting a `fetchImpl` that returns a small response literal written inline in this file:
     1. Weather: a valid current-weather payload maps to `status: "ok"` with a Celsius temperature,
        a condition label, and a source observation time resolved through `parseZonedTimestamp`.
@@ -266,14 +266,14 @@ task adds a second file, a fixture, a helper, or a double.
     3. FX: a valid MEP payload maps to a two-decimal ARS-per-USD midpoint labeled `MEP/bolsa`.
 
     Use `node:test` and `node:assert`. Import the adapter factories from `src/sources/`. No network.
-- [ ] T022 [TEST] Add exactly **3 failure tests** to `tests/adapters.test.js`, each injecting a
+- [x] T022 [TEST] Add exactly **3 failure tests** to `tests/adapters.test.js`, each injecting a
     `fetchImpl` that returns a non-2xx response:
     1. Weather: yields `status: "error"` with an `upstream_error` code and no invented value.
     2. CEDEAR: yields `status: "error"` and no substituted ticker.
     3. FX: yields `status: "error"` and no BNA, blue, or CCL fallback.
 
     Assert the error object has no `value` key and no upstream response text or stack trace.
-- [ ] T023 [TEST] Verify the suite budget and run it. Confirm `npm test` is green, reports exactly
+- [x] T023 [TEST] Verify the suite budget and run it. Confirm `npm test` is green, reports exactly
     **8 tests**, that `find tests -type f` returns only `tests/render.test.js` and
     `tests/adapters.test.js`, and that no `tests/fixtures/`, `tests/helpers/`, `tests/unit/`, or
     `tests/integration/` directory exists. If any of this fails, fold or delete the offending test
