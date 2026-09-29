@@ -366,3 +366,46 @@ task adds a second file, a fixture, a helper, or a double.
 - Stop at any checkpoint to validate the story independently.
 - Avoid: vague tasks, same-file conflicts, cross-story dependencies that break independence, a build
   step or runtime dependency, and any scope listed in FR-016.
+
+---
+
+## Phase 8: Convergence
+
+**Purpose**: Close the two gaps found by a `/speckit-converge` pass on 2026-09-28, which assessed
+the implemented code against spec.md, plan.md, tasks.md, and the constitution. Both are unused or
+speculative code, not missing functionality: all 16 FR, all 9 SC, the 4 user stories, the 8 edge
+cases, and all 7 constitution principles are already satisfied, and the suite is 8/8 in 2 files.
+
+**Constraints for this phase**: Neither task may add a test, a test file, a fixture, a helper, or a
+double — the suite stays at exactly 8 tests against the cap of 12. Neither task may change any
+rendered value, error message, status code, or API field. Neither task may add a dependency. If
+removing either seam turns out to change observable behavior, that is a signal the seam is load-
+bearing after all: stop and report instead of "fixing" it.
+
+- [x] T030 Remove the unused `adapters` override parameter from `createServer()` in `src/server.js`
+  (unrequested, MEDIUM). `createServer({ fetchImpl, now, adapters })` accepts an optional adapter-map
+  override that is spread over the three real adapters at `src/server.js:87-92`, but no caller in
+  `src/`, `tests/`, or any harness passes it — `grep -rn "adapters:"` matches only the definition
+  itself. The artifacts document the signature as `createServer({ fetchImpl, now })` (tasks.md:45),
+  and the constitution forbids building a test seam that no allowed test justifies. Drop the
+  `adapters` parameter and the spread, leaving the three real adapter factories in place, and keep
+  `startServer` unchanged. Confirm `npm test` is still 8/8 and that a live `GET /api/dashboard` still
+  returns all three widgets `status: "ok"` with the CEDEAR order `AAPL`, `MSFT`, `GOOGL`, `META`,
+  `NVDA`. This task is cleanup, not a refactor: do not restructure the service, the route, or the
+  adapters while removing it.
+- [ ] T031 Remove or justify the triplicated `isFetchFailure` upstream-error-envelope heuristic
+  (unrequested, LOW). Each adapter contains a copy of a function that treats a 200 response whose
+  body is exactly `{ code: string, message: string }` as a typed upstream failure
+  (`src/sources/open-meteo.js:50-58`, `src/sources/data912-cedears.js:22-30`,
+  `src/sources/dolarapi-mep.js:15-23`). No requirement, contract, or research item describes such an
+  envelope — `research.md:75` enumerates the failure modes and a 200-with-error-body is not among
+  them — and all three live APIs were checked and return unrelated shapes, so the branch is dead in
+  production. Preferred resolution: delete the function and its call site from all three adapters,
+  letting a 200 with an unexpected shape fall through to the existing `invalid_schema` / `invalid_value`
+  / `missing_ticker` paths, which already produce a visible, typed, sanitized widget error. If instead
+  it is kept, add a one-line comment at each copy naming the upstream whose error envelope it assumes,
+  so the assumption is recorded rather than implied. Either way, leave `errorResult`'s sanitization in
+  `src/dashboard/normalize.js` untouched. Confirm `npm test` is still 8/8.
+
+**Checkpoint**: `npm test` green at exactly 8 tests in 2 files, live `/api/dashboard` unchanged, and no
+behavior in the browser changed by either task.

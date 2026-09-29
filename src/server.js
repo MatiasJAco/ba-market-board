@@ -80,15 +80,14 @@ function sendText(response, status, body, statusMessage) {
   send(response, status, "text/plain; charset=utf-8", body, statusMessage);
 }
 
-export function createServer({ fetchImpl = globalThis.fetch, now = Date.now, adapters = {} } = {}) {
+export function createServer({ fetchImpl = globalThis.fetch, now = Date.now } = {}) {
   const { publicDir, timeoutMs } = loadConfig();
   const handleDashboard = createDashboardHandler({
     service: createDashboardService({
       adapters: {
         weather: createOpenMeteoAdapter,
         cedears: createData912CedearsAdapter,
-        mep: createDolarApiMepAdapter,
-        ...adapters
+        mep: createDolarApiMepAdapter
       },
       now,
       fetchImpl,
