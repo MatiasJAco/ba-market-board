@@ -153,6 +153,10 @@ src/
 └── public/                # index.html, styles.css, app.js, render.js
 ```
 
+La página son tres bloques apilados en una sola columna —`Clima`, `CEDEARs` y `Dólar MEP/bolsa`— y
+cada bloque reparte un solo valor entre un elemento principal, que lleva el número dominante, y sus
+elementos de apoyo, que se pueden tipografiar por separado.
+
 El cliente (`src/public/app.js`) pide el snapshot una sola vez y delega el dibujo en
 `src/public/render.js`, que solo usa `getElementById`, `textContent` y `hidden`: no crea elementos
 ni interpola HTML. La página y los mensajes están en español, con formatos numéricos y de fecha

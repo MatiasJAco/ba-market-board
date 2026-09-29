@@ -10,40 +10,90 @@
     <main id="app" class="board">
       <header class="board__header">
         <h1 class="board__title">Tablero de mercado</h1>
-        <p class="board__subtitle">Buenos Aires &middot; una sola consulta por carga de página</p>
       </header>
 
-      <section id="weather-widget" class="widget" aria-labelledby="weather-heading">
-        <h2 id="weather-heading" class="widget__title">Clima en Buenos Aires</h2>
-        <p id="weather-source" class="widget__source" hidden></p>
-        <p id="weather-loading" class="widget__loading" role="status" aria-live="polite">
+      <section id="weather-widget" class="board__block" aria-labelledby="weather-heading">
+        <h2 id="weather-heading" class="board__block__title">Clima</h2>
+        <p id="weather-source" class="board__block__source" hidden></p>
+        <p id="weather-loading" class="board__block__loading" role="status" aria-live="polite">
           Cargando el clima…
         </p>
-        <div id="weather-value" class="widget__value" hidden></div>
-        <p id="weather-time" class="widget__time" hidden></p>
-        <div id="weather-error" class="widget__error" role="alert" aria-live="polite" hidden></div>
+        <div id="weather-value" class="board__block__value board__block__hero" hidden></div>
+        <p id="weather-condition" class="board__block__condition" hidden></p>
+        <p id="weather-location" class="board__block__location" hidden></p>
+        <p id="weather-time" class="board__block__time" hidden></p>
+        <div id="weather-error" class="board__block__error" role="alert" aria-live="polite" hidden></div>
       </section>
 
-      <section id="cedears-widget" class="widget" aria-labelledby="cedears-heading">
-        <h2 id="cedears-heading" class="widget__title">CEDEARs</h2>
-        <p id="cedears-source" class="widget__source" hidden></p>
-        <p id="cedears-loading" class="widget__loading" role="status" aria-live="polite">
+      <section id="cedears-widget" class="board__block" aria-labelledby="cedears-heading">
+        <h2 id="cedears-heading" class="board__block__title">CEDEARs</h2>
+        <p id="cedears-source" class="board__block__source" hidden></p>
+        <p id="cedears-loading" class="board__block__loading" role="status" aria-live="polite">
           Cargando los CEDEARs…
         </p>
-        <div id="cedears-value" class="widget__value" hidden></div>
-        <p id="cedears-time" class="widget__time" hidden></p>
-        <div id="cedears-error" class="widget__error" role="alert" aria-live="polite" hidden></div>
+        <div id="cedears-value" class="board__block__value" hidden></div>
+        <!--
+          Five static rows, one per quote in the adapter's order: row n is
+          written from quote n. They are in the markup because the renderer may
+          only use getElementById, textContent and hidden, so it cannot build
+          them. Every cell starts hidden and empty, so nothing on the page
+          depends on script to be there, and no ticker is hardcoded here: the
+          order is positional.
+
+          Two columns. The row header is the instrument cell, which is a flex
+          line of the ticker and the label, so the ticker can be held at its
+          full width while the label takes what is left and cuts off. The two
+          spans are the elements the renderer writes to, one id each.
+
+          The header's price <th> is not a price cell: it carries its own class,
+          so the stylesheet can reveal the table from a price cell in the body
+          alone and the header alone can never turn the table on.
+        -->
+        <table class="board__block__table">
+          <thead>
+            <tr>
+              <th scope="col" class="board__block__cell board__block__cell-head">CEDEAR</th>
+              <th scope="col" class="board__block__cell board__block__cell-head board__block__cell-head-price">Precio (ARS)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="board__block__row">
+              <th scope="row" class="board__block__cell board__block__cell-instrument"><span id="cedear-0-ticker" class="board__block__cell-ticker" hidden></span><span id="cedear-0-label" class="board__block__cell-label" hidden></span></th>
+              <td id="cedear-0-price" class="board__block__cell board__block__cell-price" hidden></td>
+            </tr>
+            <tr class="board__block__row">
+              <th scope="row" class="board__block__cell board__block__cell-instrument"><span id="cedear-1-ticker" class="board__block__cell-ticker" hidden></span><span id="cedear-1-label" class="board__block__cell-label" hidden></span></th>
+              <td id="cedear-1-price" class="board__block__cell board__block__cell-price" hidden></td>
+            </tr>
+            <tr class="board__block__row">
+              <th scope="row" class="board__block__cell board__block__cell-instrument"><span id="cedear-2-ticker" class="board__block__cell-ticker" hidden></span><span id="cedear-2-label" class="board__block__cell-label" hidden></span></th>
+              <td id="cedear-2-price" class="board__block__cell board__block__cell-price" hidden></td>
+            </tr>
+            <tr class="board__block__row">
+              <th scope="row" class="board__block__cell board__block__cell-instrument"><span id="cedear-3-ticker" class="board__block__cell-ticker" hidden></span><span id="cedear-3-label" class="board__block__cell-label" hidden></span></th>
+              <td id="cedear-3-price" class="board__block__cell board__block__cell-price" hidden></td>
+            </tr>
+            <tr class="board__block__row">
+              <th scope="row" class="board__block__cell board__block__cell-instrument"><span id="cedear-4-ticker" class="board__block__cell-ticker" hidden></span><span id="cedear-4-label" class="board__block__cell-label" hidden></span></th>
+              <td id="cedear-4-price" class="board__block__cell board__block__cell-price" hidden></td>
+            </tr>
+          </tbody>
+        </table>
+        <p id="cedears-time" class="board__block__time" hidden></p>
+        <div id="cedears-error" class="board__block__error" role="alert" aria-live="polite" hidden></div>
       </section>
 
-      <section id="mep-widget" class="widget" aria-labelledby="mep-heading">
-        <h2 id="mep-heading" class="widget__title">Dólar MEP/bolsa</h2>
-        <p id="mep-source" class="widget__source" hidden></p>
-        <p id="mep-loading" class="widget__loading" role="status" aria-live="polite">
+      <section id="mep-widget" class="board__block" aria-labelledby="mep-heading">
+        <h2 id="mep-heading" class="board__block__title">Dólar MEP/bolsa</h2>
+        <p id="mep-source" class="board__block__source" hidden></p>
+        <p id="mep-loading" class="board__block__loading" role="status" aria-live="polite">
           Cargando el dólar MEP…
         </p>
-        <div id="mep-value" class="widget__value" hidden></div>
-        <p id="mep-time" class="widget__time" hidden></p>
-        <div id="mep-error" class="widget__error" role="alert" aria-live="polite" hidden></div>
+        <div id="mep-value" class="board__block__value board__block__hero" hidden></div>
+        <p id="mep-unit" class="board__block__unit" hidden></p>
+        <p id="mep-detail" class="board__block__detail" hidden></p>
+        <p id="mep-time" class="board__block__time" hidden></p>
+        <div id="mep-error" class="board__block__error" role="alert" aria-live="polite" hidden></div>
       </section>
     </main>
     <script type="module" src="/app.js"></script>
