@@ -12,7 +12,7 @@ function isRecord(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
-function isFetchFailure(payload) {
+function isTransportError(payload) {
   if (!isRecord(payload)) {
     return false;
   }
@@ -45,7 +45,7 @@ export function createDolarApiMepAdapter({
       const retrievedAt = new Date(nowMs).toISOString();
       const payload = await fetchJson(SOURCE_URLS.dolarApi, { fetchImpl, timeoutMs });
 
-      if (isFetchFailure(payload)) {
+      if (isTransportError(payload)) {
         return failure(retrievedAt, payload.code, payload.message);
       }
 

@@ -393,7 +393,7 @@ bearing after all: stop and report instead of "fixing" it.
   returns all three widgets `status: "ok"` with the CEDEAR order `AAPL`, `MSFT`, `GOOGL`, `META`,
   `NVDA`. This task is cleanup, not a refactor: do not restructure the service, the route, or the
   adapters while removing it.
-- [ ] T031 Remove or justify the triplicated `isFetchFailure` upstream-error-envelope heuristic
+- [x] T031 Remove or justify the triplicated `isFetchFailure` upstream-error-envelope heuristic
   (unrequested, LOW). Each adapter contains a copy of a function that treats a 200 response whose
   body is exactly `{ code: string, message: string }` as a typed upstream failure
   (`src/sources/open-meteo.js:50-58`, `src/sources/data912-cedears.js:22-30`,
@@ -406,6 +406,10 @@ bearing after all: stop and report instead of "fixing" it.
   it is kept, add a one-line comment at each copy naming the upstream whose error envelope it assumes,
   so the assumption is recorded rather than implied. Either way, leave `errorResult`'s sanitization in
   `src/dashboard/normalize.js` untouched. Confirm `npm test` is still 8/8.
+  *Premise investigated, found invalid: `fetchJson` never throws and returns `typedError(code)` — the
+  literal `{ code, message }` — on every failure path, so this function is the bridge from that
+  transport envelope to a typed adapter error, required by FR-010's distinct `upstream_error` /
+  `timeout` / `invalid_json` states. Resolved by renaming it to `isTransportError`; nothing deleted.*
 
 **Checkpoint**: `npm test` green at exactly 8 tests in 2 files, live `/api/dashboard` unchanged, and no
 behavior in the browser changed by either task.
