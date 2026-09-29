@@ -285,24 +285,24 @@ task adds a second file, a fixture, a helper, or a double.
 
 ## Phase 7: Polish and Cross-Cutting Gates
 
-- [ ] T024 [P] Write `README.md`: prerequisites (Node.js 24 LTS, a modern browser, internet access;
+- [x] T024 [P] Write `README.md`: prerequisites (Node.js 24 LTS, a modern browser, internet access;
   **no Docker**), how to run locally (`npm start`, `http://127.0.0.1:3000/`,
   `PORT=3100 node src/server.js`), how to run the tests (`npm test` / `node --test`), what each
   widget shows, the resolved data policy (fixed `AAPL, MSFT, GOOGL, META, NVDA`; MEP/bolsa midpoint
   with no BNA or blue fallback; Celsius from Open-Meteo; refresh on page load only), and the note
   that no API keys or secrets are required.
-- [ ] T025 [P] Run a repository hygiene scan for API keys, tokens, `.env` files, and secret
+- [x] T025 [P] Run a repository hygiene scan for API keys, tokens, `.env` files, and secret
   environment variables across `src/`, `tests/`, `README.md`, and `package.json`, and confirm none
   exist (FR-013, Constitution III).
-- [ ] T026 Confirm scope exclusions hold: no authentication, alerts, historical charts, trading
+- [x] T026 Confirm scope exclusions hold: no authentication, alerts, historical charts, trading
   actions, database, cache, background scheduler, Docker, or build step exists in `src/`
   (FR-016, Constitution I and V).
-- [ ] T027 Review `src/public/app.js` by hand and confirm it registers no interval, retry loop, or
+- [x] T027 Review `src/public/app.js` by hand and confirm it registers no interval, retry loop, or
   polling timer, and that loading the page and waiting does not change the displayed snapshot
   (FR-003, SC-004). This replaces the deleted no-refresh test and is a review item, not a test.
-- [ ] T028 Run every command in `specs/002-dashboard-data-policy/quickstart.md` as written and
+- [x] T028 Run every command in `specs/002-dashboard-data-policy/quickstart.md` as written and
   confirm each behaves as documented (SC-009).
-- [ ] T029 Manually walk the per-story Independent Test in Phases 2-5 and record the result for each
+- [x] T029 Manually walk the per-story Independent Test in Phases 2-5 and record the result for each
   story in the completion report, since no per-story automated test exists.
 
 ---
