@@ -41,7 +41,7 @@ Two consequences drive the new list:
 | File | State |
 |------|-------|
 | `package.json` | Done: ES modules, Node >= 24, empty `dependencies`, `start` and `test` scripts |
-| `src/config.js` | Done: host, port, `PORT`/`HOST` only, 2500 ms timeout, the three fixed source URLs |
+| `src/config.js` | Done: host, port, `PORT`/`HOST` only, 2500 ms timeout, the three fixed source URLs. **Superseded**: the 2500 ms timeout is replaced by the single 15,000-millisecond budget in [`specs/004-fix-timeout-budget/contracts/wait-budget.md`](../004-fix-timeout-budget/contracts/wait-budget.md) |
 | `src/server.js` | Static file serving from `src/public/` with 404/405 and traversal protection. Exports `createServer({ fetchImpl, now })` and `startServer()`. **No `/api/dashboard` route yet.** |
 | `src/lib/json-fetch.js` | Done: injected `fetchImpl`, abort-signal timeout, typed errors, no retries |
 | `src/dashboard/normalize.js` | Done: `okResult`, `errorResult`, `ERROR_CODES`, safe default messages |

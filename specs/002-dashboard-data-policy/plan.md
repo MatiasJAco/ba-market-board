@@ -26,6 +26,8 @@ The fixed CEDEAR list is `AAPL`, `MSFT`, `GOOGL`, `META`, and `NVDA`. The exchan
 
 **Performance Goals**: Show all initial widget states within 3 seconds at the 95th percentile under a normal mobile connection; apply a 2.5-second timeout to each upstream request; make three upstream requests in parallel per page load; never poll
 
+> **Superseded**: the 2.5-second per-request timeout in this line is superseded by the single 15,000-millisecond budget defined in [`specs/004-fix-timeout-budget/contracts/wait-budget.md`](../004-fix-timeout-budget/contracts/wait-budget.md). Everything else in this line still stands.
+
 **Constraints**: One page; public/free sources; no secrets in git; fixed five-ticker CEDEAR list; MEP/bolsa midpoint with no BNA or blue fallback; Celsius weather; explicit source or retrieval timestamp; independent visible errors; at most 12 automated tests with no forbidden test pattern; no Docker, database, build step, authentication, alerts, charts, or trading actions
 
 **Scale/Scope**: One small server process, one browser page, three source adapters, five CEDEAR rows, no persistence, no background jobs, and no multi-user data model

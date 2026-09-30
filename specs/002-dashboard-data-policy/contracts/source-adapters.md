@@ -10,6 +10,8 @@ createAdapter({ fetchImpl, now, timeoutMs }) -> fetchSnapshot() -> WidgetResult
 
 The default production dependency is the platform `fetch`; tests provide a deterministic function. The default timeout is 2,500 milliseconds. Adapters do not retry.
 
+> **Superseded**: "The default timeout is 2,500 milliseconds" is superseded by the single 15,000-millisecond budget in [`specs/004-fix-timeout-budget/contracts/wait-budget.md`](../../004-fix-timeout-budget/contracts/wait-budget.md). The no-retry rule above is unchanged.
+
 ## Shared Validation
 
 - A non-2xx response becomes `upstream_error`.
