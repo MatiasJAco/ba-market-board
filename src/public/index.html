@@ -32,23 +32,7 @@
           Cargando los CEDEARs…
         </p>
         <div id="cedears-value" class="board__block__value" hidden></div>
-        <!--
-          Five static rows, one per quote in the adapter's order: row n is
-          written from quote n. They are in the markup because the renderer may
-          only use getElementById, textContent and hidden, so it cannot build
-          them. Every cell starts hidden and empty, so nothing on the page
-          depends on script to be there, and no ticker is hardcoded here: the
-          order is positional.
 
-          Two columns. The row header is the instrument cell, which is a flex
-          line of the ticker and the label, so the ticker can be held at its
-          full width while the label takes what is left and cuts off. The two
-          spans are the elements the renderer writes to, one id each.
-
-          The header's price <th> is not a price cell: it carries its own class,
-          so the stylesheet can reveal the table from a price cell in the body
-          alone and the header alone can never turn the table on.
-        -->
         <table class="board__block__table">
           <thead>
             <tr>

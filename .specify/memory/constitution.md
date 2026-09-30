@@ -1,6 +1,27 @@
 <!--
 Sync Impact Report
-- Version change: 1.0.0 → 2.0.0 (MAJOR)
+- Version change: 2.0.0 → 2.1.0 (MINOR)
+- Reason: a new principle is added, Principle VIII (Lean Source and Honest Tests): source files
+  MUST NOT contain essay comments, and tests MUST NOT cite plan.md or assert against stylesheet
+  source text. Adding a principle is MINOR per the Governance section.
+- Added principles: VIII. Lean Source and Honest Tests (NON-NEGOTIABLE)
+- Modified sections: Development Workflow and Quality Gates (one added review gate, Principle VIII)
+- Unchanged principles: I, II, III, IV, V, VI, VII. The 12-test cap, the allowed test inventory,
+  the product scope, the external API set, and every user-visible behavior are all untouched.
+- Removed sections: none
+- Downstream artifacts requiring cleanup (not changed by this amendment):
+  src/public/render.js (45 comment lines, far past the one-short-line rule),
+  tests/adapters.test.js and tests/render.test.js (essay comments; both cite
+  specs/002-dashboard-data-policy/plan.md), tests/render.test.js (the smoke test reads
+  /styles.css and asserts on its text, which Principle VIII now forbids)
+- Migration impact: no product, API, or test-count change. The suite stays at 8 tests; the
+  stylesheet assertions are dropped from the smoke test rather than moved to a new test.
+- Follow-up TODOs: strip the essay comments and the plan.md citations, drop the stylesheet
+  assertions, in a later implementation step
+-->
+
+<!--
+Previous Sync Impact Report (1.0.0 → 2.0.0)
 - Reason: Principle II redefined. "Test-First" (TDD, tests-before-implementation, mandatory
   red-green ceremony) is replaced by "Right-Sized Tests" (hard cap of 12 automated tests for the
   whole app, fixed allowed inventory, explicit forbidden patterns). Redefining a non-negotiable
@@ -80,6 +101,21 @@ that needed them.
 accepted as uncovered. Principle VII's user-visible error requirement stands on its own and
 is not weakened by the removal of the TDD ceremony.
 
+### VIII. Lean Source and Honest Tests (NON-NEGOTIABLE)
+
+**Source comments**: source files MUST NOT contain essay comments. A comment is permitted only
+for a non-obvious invariant, and then as at most one short line. Comments MUST NOT restate the
+specification, the plan, or a class, function, or variable name, and MUST NOT narrate what the
+code visibly does.
+
+**Tests**: tests MUST NOT cite plan.md, or any other plan or Spec Kit artifact path, in their
+contents, names, or failure messages. Tests MUST NOT assert against stylesheet source text;
+styling is verified in the browser, not in the suite. A test asserts behavior the product
+exposes, not the bytes or the comments a file happens to ship.
+
+This principle constrains how code and tests are written. It does not add product
+functionality, change any external API, and does not raise or lower the Principle II test cap.
+
 ### III. No API Secrets in Git (NON-NEGOTIABLE)
 
 API keys, tokens, passwords, private credentials, and other secrets MUST NOT be committed to
@@ -131,6 +167,8 @@ false zero values, or an apparently healthy page.
 - Adding a helper module for testability is optional, not a reason to add a test. Prefer code
   that can be exercised from the eight allowed tests; do not build a test-seam architecture
   (document doubles, scheduler doubles, clock injection) that has no allowed test to justify it.
+- Every review MUST check Principle VIII: no essay comments, no comment restating a name, no
+  test citing plan.md, and no test asserting against stylesheet source text.
 
 ## Governance
 
@@ -143,4 +181,4 @@ adding a principle or materially expanding governance guidance, and PATCH for cl
 do not change governance meaning. Every amendment MUST update the version and amendment date.
 Reviews and implementation work MUST verify compliance before completion.
 
-**Version**: 2.0.0 | **Ratified**: 2026-09-25 | **Last Amended**: 2026-09-28
+**Version**: 2.1.0 | **Ratified**: 2026-09-25 | **Last Amended**: 2026-09-30
