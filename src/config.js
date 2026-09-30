@@ -2,7 +2,7 @@ import { fileURLToPath } from "node:url";
 
 export const DEFAULT_HOST = "127.0.0.1";
 export const DEFAULT_PORT = 3000;
-export const DEFAULT_TIMEOUT_MS = 2500;
+export const DEFAULT_TIMEOUT_MS = 15000;
 
 export const SOURCE_URLS = Object.freeze({
   openMeteo: "https://api.open-meteo.com/v1/forecast",
@@ -30,12 +30,24 @@ function readHost(env) {
   return typeof raw === "string" && raw.trim() !== "" ? raw.trim() : DEFAULT_HOST;
 }
 
+function readTimeoutMs(env) {
+  const raw = env.TIMEOUT_MS;
+
+  if (typeof raw !== "string" || !/^\d+$/.test(raw.trim())) {
+    return DEFAULT_TIMEOUT_MS;
+  }
+
+  const timeoutMs = Number.parseInt(raw.trim(), 10);
+
+  return timeoutMs > 0 ? timeoutMs : DEFAULT_TIMEOUT_MS;
+}
+
 export function loadConfig(env = process.env) {
   return {
     host: readHost(env),
     port: readPort(env),
     publicDir: PUBLIC_DIR,
-    timeoutMs: DEFAULT_TIMEOUT_MS,
+    timeoutMs: readTimeoutMs(env),
     sources: { ...SOURCE_URLS }
   };
 }

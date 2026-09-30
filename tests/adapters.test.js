@@ -1,28 +1,18 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import { DEFAULT_TIMEOUT_MS } from "../src/config.js";
 import { createData912CedearsAdapter } from "../src/sources/data912-cedears.js";
 import { createDolarApiMepAdapter } from "../src/sources/dolarapi-mep.js";
 import { createOpenMeteoAdapter } from "../src/sources/open-meteo.js";
 
-// Tests 2-7 of the 8-test budget in specs/002-dashboard-data-policy/plan.md:
-// three adapters x (happy path, failure). Every test injects its own `fetchImpl`
-// and its own response literal, so there is no tests/fixtures/, no shared test
-// helper and no test-double module anywhere in the suite. Nothing here opens a
-// socket; the only network the process can touch is 127.0.0.1 in the smoke test.
-
-// The adapters call `now()` exactly like Date.now, and compare the result against
-// the source observation time, so the clock is injected to keep every staleness
-// and clock-skew assertion deterministic. 2026-09-25 is inside both the 3-hour
-// weather window and the 7-day market window.
+// Inside both the 3-hour weather window and the 7-day market window.
 const FIXED_NOW = "2026-09-25T17:45:00.000Z";
-const TIMEOUT_MS = 2500;
 
 test("weather adapter (happy path): a valid current-weather response maps to a Celsius value and a source observation time", async () => {
   const payload = {
     current: {
-      // Open-Meteo answers in the requested zone, so this wall clock arrives
-      // offset-less and must be resolved through parseZonedTimestamp.
+      // An offset-less wall clock, resolved through parseZonedTimestamp.
       time: "2026-09-25T14:45",
       temperature_2m: 21.4,
       weather_code: 2
@@ -38,7 +28,7 @@ test("weather adapter (happy path): a valid current-weather response maps to a C
   const adapter = createOpenMeteoAdapter({
     fetchImpl,
     now: () => Date.parse(FIXED_NOW),
-    timeoutMs: TIMEOUT_MS
+    timeoutMs: DEFAULT_TIMEOUT_MS
   });
 
   const result = await adapter.fetchSnapshot();
@@ -51,8 +41,6 @@ test("weather adapter (happy path): a valid current-weather response maps to a C
   assert.equal(result.value.condition, "Parcialmente nublado");
   assert.doesNotMatch(result.value.condition, /[0-9]/);
 
-  // A Buenos Aires wall clock of 14:45 is 17:45Z, and a valid source time keeps
-  // the source timestamp kind rather than falling back to the retrieval time.
   assert.equal(result.value.timestampKind, "source");
   assert.equal(result.value.observedAt, FIXED_NOW);
 
@@ -64,8 +52,7 @@ test("weather adapter (happy path): a valid current-weather response maps to a C
 });
 
 test("cedears adapter (happy path): a valid quotes response maps to exactly the five fixed tickers in order", async () => {
-  // Deliberately out of allowlist order, with two non-allowlist symbols and a
-  // numeric `n` field that must never be mistaken for the price.
+  // Out of allowlist order, with a decoy `n` field and non-allowlist symbols.
   const payload = [
     { symbol: "NVDA", c: 198000.5, n: 999 },
     { symbol: "TSLA", c: 111111, n: 999 },
@@ -85,7 +72,7 @@ test("cedears adapter (happy path): a valid quotes response maps to exactly the 
   const adapter = createData912CedearsAdapter({
     fetchImpl,
     now: () => Date.parse(FIXED_NOW),
-    timeoutMs: TIMEOUT_MS
+    timeoutMs: DEFAULT_TIMEOUT_MS
   });
 
   const result = await adapter.fetchSnapshot();
@@ -94,8 +81,6 @@ test("cedears adapter (happy path): a valid quotes response maps to exactly the 
   assert.equal(result.source, "Data912");
   assert.equal(result.retrievedAt, FIXED_NOW);
 
-  // The adapter reorders to the fixed allowlist instead of passing the payload
-  // order through, and drops every symbol outside it.
   assert.deepEqual(
     result.value.quotes.map((quote) => quote.ticker),
     ["AAPL", "MSFT", "GOOGL", "META", "NVDA"]
@@ -105,8 +90,7 @@ test("cedears adapter (happy path): a valid quotes response maps to exactly the 
   assert.equal(result.value.quotes[0].priceArs, 27400.1);
   assert.equal(result.value.quotes[4].priceArs, 198000.5);
 
-  // The documented source has no quote timestamp, so the line is labeled as a
-  // retrieval time and never claimed to be live.
+  // The source publishes no quote timestamp.
   assert.equal(result.value.timestampKind, "retrieval");
   assert.ok(result.value.quotes.every((quote) => quote.observedAt === null));
 
@@ -116,9 +100,6 @@ test("cedears adapter (happy path): a valid quotes response maps to exactly the 
 });
 
 test("fx adapter (happy path): a valid MEP response maps to a two-decimal ARS-per-USD midpoint labeled MEP/bolsa", async () => {
-  // The midpoint is (1549.4 + 1550.894) / 2 = 1550.147, which must round to
-  // 1550.15 rather than pass through. `valor` stands in for a source-supplied
-  // midpoint that the adapter must ignore.
   const payload = {
     compra: 1549.4,
     venta: 1550.894,
@@ -135,7 +116,7 @@ test("fx adapter (happy path): a valid MEP response maps to a two-decimal ARS-pe
   const adapter = createDolarApiMepAdapter({
     fetchImpl,
     now: () => Date.parse(FIXED_NOW),
-    timeoutMs: TIMEOUT_MS
+    timeoutMs: DEFAULT_TIMEOUT_MS
   });
 
   const result = await adapter.fetchSnapshot();
@@ -163,8 +144,7 @@ test("fx adapter (happy path): a valid MEP response maps to a two-decimal ARS-pe
 });
 
 test("weather adapter (failure): a non-2xx response yields a typed error and invents no value", async () => {
-  // A body that would parse into a perfectly valid reading, plus the sort of
-  // debug text an upstream might leak. Neither may reach the result.
+  // A body that parses cleanly must still yield no value.
   const body = JSON.stringify({
     current: { time: "2026-09-25T14:45", temperature_2m: 99.9, weather_code: 0 },
     upstreamDebug: "SENTINEL-UPSTREAM-TEXT",
@@ -180,7 +160,7 @@ test("weather adapter (failure): a non-2xx response yields a typed error and inv
   const adapter = createOpenMeteoAdapter({
     fetchImpl,
     now: () => Date.parse(FIXED_NOW),
-    timeoutMs: TIMEOUT_MS
+    timeoutMs: DEFAULT_TIMEOUT_MS
   });
 
   const result = await adapter.fetchSnapshot();
@@ -210,9 +190,7 @@ test("weather adapter (failure): a non-2xx response yields a typed error and inv
   assert.doesNotMatch(message, /[\u0000-\u001f\u007f]/, "no stack trace or control characters");
   assert.doesNotMatch(message, /(^|\s)at\s+[\w$.<>]+\s*\(/, "no stack frame in the message");
 
-  // Folded into this same allowed test rather than added as a ninth one: a 200
-  // response carrying no usable reading must fail the same way. A fabricated
-  // "0 degrees" is exactly the false zero Principle VII forbids.
+  // A 200 with no current block must fail, never fabricate a zero.
   const unusable = await createOpenMeteoAdapter({
     fetchImpl: async () => ({
       ok: true,
@@ -220,13 +198,58 @@ test("weather adapter (failure): a non-2xx response yields a typed error and inv
       text: async () => JSON.stringify({ detail: "SENTINEL-UPSTREAM-TEXT" })
     }),
     now: () => Date.parse(FIXED_NOW),
-    timeoutMs: TIMEOUT_MS
+    timeoutMs: DEFAULT_TIMEOUT_MS
   }).fetchSnapshot();
 
   assert.equal(unusable.status, "error", "a 200 with no current block must not be a reading");
   assert.equal("value" in unusable, false, "an error result must carry no value key");
   assert.ok(!JSON.stringify(unusable).includes("temperatureC"));
   assert.ok(!JSON.stringify(unusable).includes("SENTINEL-UPSTREAM-TEXT"));
+
+  assert.equal(DEFAULT_TIMEOUT_MS, 15000, "the documented wait budget");
+
+  // No timeoutMs argument at all, so the signal can only come from configuration.
+  const seenOptions = [];
+
+  await createOpenMeteoAdapter({
+    fetchImpl: async (_url, options) => {
+      seenOptions.push(options);
+
+      return {
+        ok: true,
+        status: 200,
+        text: async () =>
+          JSON.stringify({ current: { time: "2026-09-25T14:45", temperature_2m: 21.4, weather_code: 2 } })
+      };
+    },
+    now: () => Date.parse(FIXED_NOW)
+  }).fetchSnapshot();
+
+  assert.equal(seenOptions.length, 1);
+  assert.ok(seenOptions[0].signal instanceof AbortSignal, "the default budget is wired, not ignored");
+
+  // Rejects only when the real abort fires, exactly as undici does.
+  const expired = await createOpenMeteoAdapter({
+    fetchImpl: (_url, options) =>
+      new Promise((_resolve, reject) => {
+        options.signal.addEventListener("abort", () => reject(options.signal.reason));
+      }),
+    now: () => Date.parse(FIXED_NOW),
+    timeoutMs: 5
+  }).fetchSnapshot();
+
+  assert.equal(expired.error.code, "timeout", "an expired budget is the only timeout notice");
+
+  const aborted = await createOpenMeteoAdapter({
+    fetchImpl: async () => {
+      throw Object.assign(new Error("The operation was aborted"), { name: "AbortError" });
+    },
+    now: () => Date.parse(FIXED_NOW),
+    timeoutMs: DEFAULT_TIMEOUT_MS
+  }).fetchSnapshot();
+
+  assert.equal(aborted.error.code, "upstream_error", "a caller abort is not a source timeout");
+  assert.notEqual(aborted.error.code, "timeout");
 });
 
 test("cedears adapter (failure): a non-2xx response yields a typed error and substitutes no ticker", async () => {
@@ -245,7 +268,7 @@ test("cedears adapter (failure): a non-2xx response yields a typed error and sub
   const adapter = createData912CedearsAdapter({
     fetchImpl,
     now: () => Date.parse(FIXED_NOW),
-    timeoutMs: TIMEOUT_MS
+    timeoutMs: DEFAULT_TIMEOUT_MS
   });
 
   const result = await adapter.fetchSnapshot();
@@ -276,9 +299,7 @@ test("cedears adapter (failure): a non-2xx response yields a typed error and sub
   assert.doesNotMatch(message, /[\u0000-\u001f\u007f]/, "no stack trace or control characters");
   assert.doesNotMatch(message, /(^|\s)at\s+[\w$.<>]+\s*\(/, "no stack frame in the message");
 
-  // Folded in from this same allowed test: a 200 response that is missing a
-  // selected ticker must fail the whole widget rather than return a short list
-  // or swap in whatever the source did send.
+  // A partial list must fail the whole widget, never return a short one.
   const unusable = await createData912CedearsAdapter({
     fetchImpl: async () => ({
       ok: true,
@@ -289,7 +310,7 @@ test("cedears adapter (failure): a non-2xx response yields a typed error and sub
       ])
     }),
     now: () => Date.parse(FIXED_NOW),
-    timeoutMs: TIMEOUT_MS
+    timeoutMs: DEFAULT_TIMEOUT_MS
   }).fetchSnapshot();
 
   assert.equal(unusable.status, "error", "a partial list must not become a widget value");
@@ -320,7 +341,7 @@ test("fx adapter (failure): a non-2xx response yields a typed error and falls ba
   const adapter = createDolarApiMepAdapter({
     fetchImpl,
     now: () => Date.parse(FIXED_NOW),
-    timeoutMs: TIMEOUT_MS
+    timeoutMs: DEFAULT_TIMEOUT_MS
   });
 
   const result = await adapter.fetchSnapshot();
@@ -346,8 +367,6 @@ test("fx adapter (failure): a non-2xx response yields a typed error and falls ba
   assert.ok(!serialized.includes("SENTINEL-UPSTREAM-TEXT"));
   assert.ok(!serialized.includes("http"), "no URL in the result");
 
-  // The one request that was made still went to the MEP/bolsa quote; the
-  // adapter never retried somewhere else looking for a substitute rate.
   assert.equal(requests.length, 1);
   assert.ok(requests[0].startsWith("https://"));
   assert.ok(requests[0].endsWith("/bolsa"));
@@ -358,9 +377,7 @@ test("fx adapter (failure): a non-2xx response yields a typed error and falls ba
   assert.doesNotMatch(message, /[\u0000-\u001f\u007f]/, "no stack trace or control characters");
   assert.doesNotMatch(message, /(^|\s)at\s+[\w$.<>]+\s*\(/, "no stack frame in the message");
 
-  // Folded in from this same allowed test: a 200 response that names another
-  // rate type but carries no compra/venta must fail rather than fall back to
-  // BNA, blue or CCL.
+  // No compra/venta must fail, never fall back to another rate type.
   const unusable = await createDolarApiMepAdapter({
     fetchImpl: async () => ({
       ok: true,
@@ -369,7 +386,7 @@ test("fx adapter (failure): a non-2xx response yields a typed error and falls ba
         JSON.stringify({ nombre: "Dólar BNA", casa: "CCL", tipoCambio: "blue", valor: 99999 })
     }),
     now: () => Date.parse(FIXED_NOW),
-    timeoutMs: TIMEOUT_MS
+    timeoutMs: DEFAULT_TIMEOUT_MS
   }).fetchSnapshot();
 
   assert.equal(unusable.status, "error", "a missing compra/venta must not become a rate");

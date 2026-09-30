@@ -13,8 +13,15 @@ const CLIENT_ERROR = Object.freeze({
 let started = false;
 
 async function readSnapshot(fetchImpl) {
+  // Unsubstituted, the token is not a number, so no deadline is applied.
+  const budget = Number.parseInt("__BOARD_BUDGET_MS__", 10);
+  const bounded = Number.isFinite(budget) && budget > 0;
+
   try {
-    const response = await fetchImpl(DASHBOARD_URL, { headers: { Accept: "application/json" } });
+    const response = await fetchImpl(DASHBOARD_URL, {
+      headers: { Accept: "application/json" },
+      ...(bounded ? { signal: AbortSignal.timeout(budget) } : {})
+    });
 
     if (response === null || typeof response !== "object" || response.ok !== true) {
       return null;

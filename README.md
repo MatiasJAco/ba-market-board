@@ -110,7 +110,7 @@ cuando el MEP no está disponible: en ese caso muestra un error visible.
 ## Fuentes de datos
 
 Las tres son públicas y gratuitas, se llaman sin credenciales y no se les envía ningún dato de
-usuario. Cada petición tiene un timeout de **2500 ms** y **no** se reintenta.
+usuario. Cada petición tiene un timeout de **15000 ms** y **no** se reintenta.
 
 | Widget | Fuente | Endpoint | Campo usado |
 |--------|--------|----------|-------------|

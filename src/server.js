@@ -25,8 +25,23 @@ const CONTENT_TYPES = new Map([
   [".json", "application/json; charset=utf-8"]
 ]);
 
+const BUDGET_TOKEN = "\"__BOARD_BUDGET_MS__\"";
+const BUDGET_EXTENSIONS = new Set([".html", ".js"]);
+
 function contentTypeFor(fileName) {
   return CONTENT_TYPES.get(extname(fileName)) ?? "application/octet-stream";
+}
+
+function withBudget(body, fileName, timeoutMs) {
+  if (!BUDGET_EXTENSIONS.has(extname(fileName))) {
+    return body;
+  }
+
+  const text = body.toString("utf8");
+
+  return text.includes(BUDGET_TOKEN)
+    ? text.replaceAll(BUDGET_TOKEN, JSON.stringify(String(timeoutMs)))
+    : body;
 }
 
 function requestPath(requestUrl) {
@@ -119,7 +134,7 @@ export function createServer({ fetchImpl = globalThis.fetch, now = Date.now } = 
     }
 
     readFile(join(publicDir, fileName)).then(
-      (body) => send(response, 200, contentTypeFor(fileName), body),
+      (body) => send(response, 200, contentTypeFor(fileName), withBudget(body, fileName, timeoutMs)),
       () => sendText(response, 404, "Not Found", "Not Found")
     );
   });

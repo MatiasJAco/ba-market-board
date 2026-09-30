@@ -1,4 +1,4 @@
-const DEFAULT_TIMEOUT_MS = 2500;
+import { DEFAULT_TIMEOUT_MS } from "../config.js";
 
 const MESSAGES = {
   timeout: "La fuente de datos tardó demasiado en responder.",
@@ -12,7 +12,7 @@ function typedError(code) {
 }
 
 function isTimeoutCause(cause) {
-  return cause?.name === "TimeoutError" || cause?.name === "AbortError";
+  return cause?.name === "TimeoutError";
 }
 
 export async function fetchJson(
